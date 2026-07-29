@@ -25,7 +25,7 @@ class _HomeScreenState extends State<HomeScreen> {
       initialIndex: boards.indexWhere((b) => b.id == app.selectedBoardId).clamp(0, boards.length - 1),
       child: Scaffold(
         appBar: AppBar(
-          title: const Text('MultiNotes'),
+          title: const Text('Notiko'),
           bottom: TabBar(
             isScrollable: true,
             onTap: (i) => app.selectedBoardId = boards[i].id,
@@ -56,7 +56,12 @@ class _HomeScreenState extends State<HomeScreen> {
           ],
         ),
         body: TabBarView(
-          children: boards.map((b) => _BoardGrid(boardId: b.id)).toList(),
+          children: boards
+              .map((b) => RefreshIndicator(
+                    onRefresh: () async => app.refresh(),
+                    child: _BoardGrid(boardId: b.id),
+                  ))
+              .toList(),
         ),
         floatingActionButton: Column(
           mainAxisAlignment: MainAxisAlignment.end,
@@ -98,14 +103,18 @@ class _BoardGrid extends StatelessWidget {
     final notes = app.notesForBoard(boardId);
 
     if (notes.isEmpty) {
-      return const Center(
-        child: Padding(
-          padding: EdgeInsets.all(24),
-          child: Text(
-            "Aucune note ici pour l'instant.\nAppuie sur + pour en créer une.",
-            textAlign: TextAlign.center,
+      return ListView(
+        children: const [
+          Padding(
+            padding: EdgeInsets.all(24),
+            child: Center(
+              child: Text(
+                "Aucune note ici pour l'instant.\nAppuie sur + pour en créer une.",
+                textAlign: TextAlign.center,
+              ),
+            ),
           ),
-        ),
+        ],
       );
     }
 
