@@ -58,7 +58,12 @@ class AppProvider extends ChangeNotifier {
       );
     }
 
-    await NotificationService.instance.init();
+    try {
+      await NotificationService.instance.init();
+    } catch (_) {
+      // On ignore une erreur d'initialisation des notifications :
+      // l'appli doit rester utilisable même sans permission de notification.
+    }
     notifyListeners();
   }
 
@@ -94,19 +99,32 @@ class AppProvider extends ChangeNotifier {
     return NoteModel(id: id, boardId: boardId, type: type);
   }
 
+  /// Sauvegarde une note. Écrit d'abord dans Hive (rapide et fiable), puis
+  /// notifie l'UI immédiatement, et ne programme la notification de rappel
+  /// qu'en tâche de fond -- une erreur de notification ne doit jamais
+  /// bloquer ni faire échouer l'enregistrement de la note.
   Future<void> saveNote(NoteModel note) async {
     note.updatedAt = DateTime.now();
     await _notesBox.put(note.id, note);
-    if (note.reminderAt != null) {
-      await NotificationService.instance.scheduleReminder(note);
-    } else {
-      await NotificationService.instance.cancelReminder(note.id);
-    }
     notifyListeners();
+
+    try {
+      if (note.reminderAt != null) {
+        await NotificationService.instance.scheduleReminder(note);
+      } else {
+        await NotificationService.instance.cancelReminder(note.id);
+      }
+    } catch (_) {
+      // Ignoré volontairement : la note est déjà sauvegardée avec succès.
+    }
   }
 
   Future<void> deleteNote(String id) async {
-    await NotificationService.instance.cancelReminder(id);
+    try {
+      await NotificationService.instance.cancelReminder(id);
+    } catch (_) {
+      // Ignoré : la suppression de la note ne doit pas dépendre des notifications.
+    }
     await _notesBox.delete(id);
     notifyListeners();
   }
