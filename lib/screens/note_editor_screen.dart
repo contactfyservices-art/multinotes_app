@@ -42,15 +42,21 @@ class _NoteEditorScreenState extends State<NoteEditorScreen> {
     _contentCtrl = TextEditingController(text: note.content);
   }
 
-  Future<void> _save() async {
+  /// Sauvegarde en tâche de fond, sans bloquer l'UI (utilisée pendant la frappe).
+  void _save() {
     note.title = _titleCtrl.text;
     note.content = _contentCtrl.text;
-    await context.read<AppProvider>().saveNote(note);
+    context.read<AppProvider>().saveNote(note);
   }
 
-  Future<void> _saveAndClose() async {
-    await _save();
-    if (mounted) Navigator.pop(context);
+  /// Ferme l'écran IMMÉDIATEMENT (retour ou bouton "Enregistrer"),
+  /// la sauvegarde se termine ensuite en arrière-plan.
+  void _saveAndClose() {
+    note.title = _titleCtrl.text;
+    note.content = _contentCtrl.text;
+    final app = context.read<AppProvider>();
+    Navigator.pop(context);
+    app.saveNote(note);
   }
 
   Future<void> _pickReminder() async {
@@ -69,14 +75,14 @@ class _NoteEditorScreenState extends State<NoteEditorScreen> {
     setState(() {
       note.reminderAt = DateTime(date.year, date.month, date.day, time.hour, time.minute);
     });
-    await _save();
+    _save();
   }
 
   Future<void> _pickImage() async {
     final picked = await ImagePicker().pickImage(source: ImageSource.gallery);
     if (picked != null) {
       setState(() => note.attachmentPaths.add(picked.path));
-      await _save();
+      _save();
     }
   }
 
@@ -84,7 +90,7 @@ class _NoteEditorScreenState extends State<NoteEditorScreen> {
     final result = await FilePicker.platform.pickFiles();
     if (result != null && result.files.single.path != null) {
       setState(() => note.attachmentPaths.add(result.files.single.path!));
-      await _save();
+      _save();
     }
   }
 
@@ -104,7 +110,7 @@ class _NoteEditorScreenState extends State<NoteEditorScreen> {
     if (result != null && result.isNotEmpty) {
       final hash = sha256.convert(utf8.encode(result)).toString();
       setState(() => note.passwordHash = hash);
-      await _save();
+      _save();
     }
   }
 
@@ -115,10 +121,12 @@ class _NoteEditorScreenState extends State<NoteEditorScreen> {
   @override
   Widget build(BuildContext context) {
     return PopScope(
-      canPop: false,
-      onPopInvokedWithResult: (didPop, result) async {
-        if (didPop) return;
-        await _saveAndClose();
+      canPop: true,
+      onPopInvokedWithResult: (didPop, result) {
+        if (!didPop) return;
+        note.title = _titleCtrl.text;
+        note.content = _contentCtrl.text;
+        context.read<AppProvider>().saveNote(note);
       },
       child: Scaffold(
         backgroundColor: Color(note.colorValue),
@@ -283,9 +291,9 @@ class _NoteEditorScreenState extends State<NoteEditorScreen> {
           IconButton(
             icon: const Icon(Icons.delete_outline),
             tooltip: 'Supprimer la note',
-            onPressed: () async {
-              await context.read<AppProvider>().deleteNote(note.id);
-              if (mounted) Navigator.pop(context);
+            onPressed: () {
+              context.read<AppProvider>().deleteNote(note.id);
+              Navigator.pop(context);
             },
           ),
         ],
