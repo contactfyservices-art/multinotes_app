@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../providers/app_provider.dart';
-import '../services/overlay_service.dart';
 import 'about_screen.dart';
 
 class SettingsScreen extends StatefulWidget {
@@ -12,19 +11,6 @@ class SettingsScreen extends StatefulWidget {
 }
 
 class _SettingsScreenState extends State<SettingsScreen> {
-  bool? _overlayGranted;
-
-  @override
-  void initState() {
-    super.initState();
-    _checkOverlay();
-  }
-
-  Future<void> _checkOverlay() async {
-    final granted = await OverlayService.instance.hasPermission();
-    if (mounted) setState(() => _overlayGranted = granted);
-  }
-
   @override
   Widget build(BuildContext context) {
     final app = context.watch<AppProvider>();
@@ -46,26 +32,6 @@ class _SettingsScreenState extends State<SettingsScreen> {
             leading: const Icon(Icons.add),
             title: const Text('Ajouter un tableau'),
             onTap: () => _addBoardDialog(context, app),
-          ),
-          const Divider(),
-          const ListTile(title: Text('Mode bulle flottante', style: TextStyle(fontWeight: FontWeight.bold))),
-          SwitchListTile(
-            title: const Text("Autorisation d'affichage par-dessus les autres applis"),
-            subtitle: Text(_overlayGranted == null
-                ? 'Vérification...'
-                : _overlayGranted!
-                    ? 'Activée : la bulle flottante peut fonctionner'
-                    : "Non activée : appuie pour aller dans les réglages Android"),
-            value: _overlayGranted ?? false,
-            onChanged: (_) async {
-              await OverlayService.instance.requestPermission();
-              await _checkOverlay();
-            },
-          ),
-          ListTile(
-            leading: const Icon(Icons.blur_circular),
-            title: const Text('Lancer la bulle maintenant'),
-            onTap: () => OverlayService.instance.showBubble(),
           ),
           const Divider(),
           const ListTile(
