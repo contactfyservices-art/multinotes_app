@@ -3,7 +3,6 @@ import 'package:provider/provider.dart';
 import '../providers/app_provider.dart';
 import '../models/note_model.dart';
 import '../widgets/note_card.dart';
-import '../services/overlay_service.dart';
 import 'note_editor_screen.dart';
 import 'calendar_screen.dart';
 import 'settings_screen.dart';
@@ -48,13 +47,6 @@ class _HomeScreenState extends State<HomeScreen> {
               icon: const Icon(Icons.calendar_month),
               tooltip: 'Calendrier',
               onPressed: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const CalendarScreen())),
-            ),
-            IconButton(
-              icon: const Icon(Icons.blur_circular),
-              tooltip: 'Mode bulle flottante',
-              onPressed: () async {
-                await OverlayService.instance.showBubble();
-              },
             ),
             IconButton(
               icon: const Icon(Icons.settings),
@@ -110,7 +102,7 @@ class _BoardGrid extends StatelessWidget {
         child: Padding(
           padding: EdgeInsets.all(24),
           child: Text(
-            "Aucune note ici pour l'instant.\nAppuie sur + pour en créer une, comme sur ton exemple :\n« Vous pouvez tout noter, mais mieux quelque chose d'utile »",
+            "Aucune note ici pour l'instant.\nAppuie sur + pour en créer une.",
             textAlign: TextAlign.center,
           ),
         ),
