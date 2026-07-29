@@ -8,7 +8,7 @@ workflows:
       - flutter create . --platforms=android --org com.multinotes --project-name multinotes_app
       - flutter pub get
       - flutter pub run flutter_launcher_icons
-      - sed -i 's/android:label="multinotes_app"/android:label="Notiko"/' android/app/src/main/AndroidManifest.xml
+      - sed -i 's/android:label="[^"]*"/android:label="Notiko"/' android/app/src/main/AndroidManifest.xml
       - flutter build apk --release --no-tree-shake-icons
     artifacts:
       - build/**/outputs/**/*.apk
