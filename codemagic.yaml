@@ -4,6 +4,7 @@ workflows:
     environment:
       flutter: 3.24.5
     scripts:
+      - flutter create . --platforms=android
       - flutter pub get
       - flutter build apk --release
     artifacts:
