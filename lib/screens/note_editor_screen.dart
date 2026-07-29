@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:file_picker/file_picker.dart';
-import 'package:geolocator/geolocator.dart';
 import 'package:crypto/crypto.dart';
 import 'dart:convert';
 import '../models/note_model.dart';
@@ -81,24 +80,6 @@ class _NoteEditorScreenState extends State<NoteEditorScreen> {
     if (result != null && result.files.single.path != null) {
       setState(() => note.attachmentPaths.add(result.files.single.path!));
       await _save();
-    }
-  }
-
-  Future<void> _attachLocation() async {
-    try {
-      final pos = await Geolocator.getCurrentPosition();
-      setState(() {
-        note.latitude = pos.latitude;
-        note.longitude = pos.longitude;
-      });
-      await _save();
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Position ajoutée à la note')));
-      }
-    } catch (e) {
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Impossible de récupérer la position : $e')));
-      }
     }
   }
 
@@ -219,9 +200,7 @@ class _NoteEditorScreenState extends State<NoteEditorScreen> {
           title: TextFormField(
             initialValue: item.label,
             decoration: const InputDecoration(border: InputBorder.none, hintText: 'Élément...'),
-            style: TextDecoration.lineThrough == null
-                ? null
-                : TextStyle(decoration: item.checked ? TextDecoration.lineThrough : null),
+            style: TextStyle(decoration: item.checked ? TextDecoration.lineThrough : null),
             onChanged: (v) {
               item.label = v;
               _save();
@@ -274,7 +253,6 @@ class _NoteEditorScreenState extends State<NoteEditorScreen> {
         children: [
           IconButton(icon: const Icon(Icons.image), tooltip: 'Image', onPressed: _pickImage),
           IconButton(icon: const Icon(Icons.attach_file), tooltip: 'Document', onPressed: _pickFile),
-          IconButton(icon: const Icon(Icons.location_on), tooltip: 'Position GPS', onPressed: _attachLocation),
           IconButton(
             icon: Icon(note.type == NoteType.checklist ? Icons.notes : Icons.checklist),
             tooltip: 'Basculer en checklist / texte',
