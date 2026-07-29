@@ -44,7 +44,6 @@ class AppProvider extends ChangeNotifier {
     _boardsBox = await Hive.openBox<BoardModel>(_boardsBoxName);
 
     if (_boardsBox.isEmpty) {
-      // Tableaux par défaut, comme dans les captures : Principal / Travail / Famille
       await _boardsBox.put(
         'principal',
         BoardModel(id: 'principal', name: 'Principal', colorValue: 0xFF4CAF50, iconCode: 0xe002, order: 0),
@@ -69,6 +68,10 @@ class AppProvider extends ChangeNotifier {
     } catch (_) {
       return null;
     }
+  }
+
+  void refresh() {
+    notifyListeners();
   }
 
   Future<void> addBoard(String name, {int colorValue = 0xFF9C27B0, int iconCode = 0xe2c7}) async {
