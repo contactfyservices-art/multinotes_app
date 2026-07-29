@@ -48,6 +48,11 @@ class _NoteEditorScreenState extends State<NoteEditorScreen> {
     await context.read<AppProvider>().saveNote(note);
   }
 
+  Future<void> _saveAndClose() async {
+    await _save();
+    if (mounted) Navigator.pop(context);
+  }
+
   Future<void> _pickReminder() async {
     final date = await showDatePicker(
       context: context,
@@ -109,54 +114,66 @@ class _NoteEditorScreenState extends State<NoteEditorScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: Color(note.colorValue),
-      appBar: AppBar(
+    return PopScope(
+      canPop: false,
+      onPopInvokedWithResult: (didPop, result) async {
+        if (didPop) return;
+        await _saveAndClose();
+      },
+      child: Scaffold(
         backgroundColor: Color(note.colorValue),
-        actions: [
-          IconButton(icon: const Icon(Icons.alarm), tooltip: 'Rappel', onPressed: _pickReminder),
-          IconButton(icon: const Icon(Icons.lock_outline), tooltip: 'Mot de passe', onPressed: _setPassword),
-          IconButton(
-            icon: Icon(note.isPinned ? Icons.push_pin : Icons.push_pin_outlined),
-            onPressed: () => setState(() => note.isPinned = !note.isPinned),
-          ),
-          PopupMenuButton<int>(
-            onSelected: (i) => setState(() => note.colorValue = _kColors[i]),
-            itemBuilder: (_) => List.generate(
-              _kColors.length,
-              (i) => PopupMenuItem(
-                value: i,
-                child: Container(width: 24, height: 24, color: Color(_kColors[i])),
+        appBar: AppBar(
+          backgroundColor: Color(note.colorValue),
+          actions: [
+            IconButton(
+              icon: const Icon(Icons.check_circle),
+              tooltip: 'Enregistrer',
+              onPressed: _saveAndClose,
+            ),
+            IconButton(icon: const Icon(Icons.alarm), tooltip: 'Rappel', onPressed: _pickReminder),
+            IconButton(icon: const Icon(Icons.lock_outline), tooltip: 'Mot de passe', onPressed: _setPassword),
+            IconButton(
+              icon: Icon(note.isPinned ? Icons.push_pin : Icons.push_pin_outlined),
+              onPressed: () => setState(() => note.isPinned = !note.isPinned),
+            ),
+            PopupMenuButton<int>(
+              onSelected: (i) => setState(() => note.colorValue = _kColors[i]),
+              itemBuilder: (_) => List.generate(
+                _kColors.length,
+                (i) => PopupMenuItem(
+                  value: i,
+                  child: Container(width: 24, height: 24, color: Color(_kColors[i])),
+                ),
               ),
+              icon: const Icon(Icons.palette),
             ),
-            icon: const Icon(Icons.palette),
-          ),
-          PopupMenuButton<String>(
-            onSelected: (f) => setState(() => note.fontFamily = f),
-            itemBuilder: (_) => _kFonts.map((f) => PopupMenuItem(value: f, child: Text(f))).toList(),
-            icon: const Icon(Icons.font_download),
-          ),
-        ],
-      ),
-      body: SafeArea(
-        child: Column(
-          children: [
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 12),
-              child: TextField(
-                controller: _titleCtrl,
-                style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-                decoration: const InputDecoration(hintText: 'Titre', border: InputBorder.none),
-                onChanged: (_) => _save(),
-              ),
+            PopupMenuButton<String>(
+              onSelected: (f) => setState(() => note.fontFamily = f),
+              itemBuilder: (_) => _kFonts.map((f) => PopupMenuItem(value: f, child: Text(f))).toList(),
+              icon: const Icon(Icons.font_download),
             ),
-            const Divider(),
-            Expanded(
-              child: note.type == NoteType.checklist ? _buildChecklist() : _buildTextNote(),
-            ),
-            if (note.attachmentPaths.isNotEmpty) _buildAttachmentsPreview(),
-            _buildToolbar(),
           ],
+        ),
+        body: SafeArea(
+          child: Column(
+            children: [
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 12),
+                child: TextField(
+                  controller: _titleCtrl,
+                  style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                  decoration: const InputDecoration(hintText: 'Titre', border: InputBorder.none),
+                  onChanged: (_) => _save(),
+                ),
+              ),
+              const Divider(),
+              Expanded(
+                child: note.type == NoteType.checklist ? _buildChecklist() : _buildTextNote(),
+              ),
+              if (note.attachmentPaths.isNotEmpty) _buildAttachmentsPreview(),
+              _buildToolbar(),
+            ],
+          ),
         ),
       ),
     );
