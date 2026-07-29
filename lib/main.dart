@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'providers/app_provider.dart';
-import 'screens/home_screen.dart';
+import 'screens/welcome_screen.dart';
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
@@ -38,13 +38,13 @@ class _MultiNotesAppState extends State<MultiNotesApp> {
     return ChangeNotifierProvider.value(
       value: _appProvider,
       child: MaterialApp(
-        title: 'MultiNotes',
+        title: 'Notiko',
         debugShowCheckedModeBanner: false,
         theme: ThemeData(
           primarySwatch: Colors.green,
           useMaterial3: true,
         ),
-        home: const HomeScreen(),
+        home: const WelcomeScreen(),
       ),
     );
   }
