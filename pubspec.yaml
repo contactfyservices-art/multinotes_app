@@ -31,7 +31,7 @@ dependencies:
   video_player: ^2.8.6
 
   # Localisation
-  geolocator: ^11.0.0
+  geolocator: ^10.1.0
 
 dev_dependencies:
   flutter_test:
