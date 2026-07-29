@@ -7,6 +7,6 @@ workflows:
       - rm -rf android
       - flutter create . --platforms=android
       - flutter pub get
-      - flutter build apk --release
+      - flutter build apk --release --no-tree-shake-icons
     artifacts:
       - build/**/outputs/**/*.apk
