@@ -3,10 +3,6 @@ import 'package:provider/provider.dart';
 import 'providers/app_provider.dart';
 import 'screens/home_screen.dart';
 
-// Point d'entrée utilisé par le SYSTÈME quand la bulle flottante est affichée.
-// (voir overlay_entry.dart — nécessaire pour flutter_overlay_window)
-export 'overlay_entry.dart' show overlayMain;
-
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
   runApp(const MultiNotesApp());
